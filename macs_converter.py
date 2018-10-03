@@ -4,28 +4,10 @@ import re
 import argparse
 import csv
 
-"""
-ITERATION 2
-
-Setup a string maximum of 40 characters. If more than that put the mac into the invalid_macs dicitionary
-If len(original_mac) >40
-"""
-"""
-# For debugging purposes
-macs_list = [
-    'aa-23-45-67-89-AB',
-    'BB:23:45:67:89:AB',
-    'Cc23.4567.89AB',
-    'Dd23456789AB',
-    'Dd23456789AB',
-    'EE 2 34 56789 AB',
-    'EX:2///34/56789/AB',
-    'FF253456789AB'
-]
 
 # python mac_formatter.py --list FF253456789AB EX:2///34/56789/AB aa-23-45-67-89-AB --delimiter '.'
 # python mac_formatter.py --file macs.csv --delimiter '.'
-"""
+
 #################################### DEFS  ##############################################
 def get_invalid_macs(macs_list):
     invalid_macs = []
@@ -124,8 +106,8 @@ delim = args.delimiter
 #print(args)
 #print(args.file)
 #print(args.list)
-
 #print(macs_list)
+
 #########################FUNCTION CALLS ####################
 invalid_macs, blank_lines = get_invalid_macs(macs_list)
 valid_macs = (rem_invalid_macs(macs_list, invalid_macs))
