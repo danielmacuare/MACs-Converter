@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import re
-from pprint import pprint
+#from pprint import pprint
 import argparse
 import csv
 
@@ -134,7 +134,7 @@ formatted_macs = add_delimiter(no_sep_macs, delimiter=delim)
 
 
 if formatted_macs:
-    print(' - The following is a dict of the formatted MACs:')
+    print(' - The following is a list of formatted MACs:')
     for elements in formatted_macs.values():
         print(elements)
     print('')
@@ -152,7 +152,8 @@ if invalid_macs:
         else:
             continue
 
-print('\n')
-print("- There are {} blank lines in the list:".format(len(blank_lines)))
-for line in blank_lines:
-    print('Blank line - (Line {})'.format(line))
+# For Debugging - Count blank lines
+#print('\n')
+#print("- There are {} blank lines in the list:".format(len(blank_lines)))
+#for line in blank_lines:
+#    print('Blank line - (Line {})'.format(line))
