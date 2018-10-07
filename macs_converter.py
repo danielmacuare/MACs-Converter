@@ -1,36 +1,8 @@
 #!/usr/bin/env python
 import re
-#from pprint import pprint
 import argparse
-import csv
 import logging
-
-# python mac_formatter.py --list FF253456789AB EX:2///34/56789/AB aa-23-45-67-89-AB --delimiter '.'
-# python mac_formatter.py --file macs.csv --delimiter '.'
-
-# Logging format
-#https://docs.python.org/3/library/logging.html#logrecord-attributes
-#log_format='%(asctime)s:%(levelname)s:%(message)s'
-
-#Method 1 - ROOT Logger - Logging to a file
-#logging.basicConfig(filename='macs_converter.log', level=logging.DEBUG, format= log_format)
-
-#Method 2 - ROOT Logger - Logging to stdout
-#logging.basicConfig(level=logging.DEBUG)
-
-#Method 3- Logging with a non default logger (Best practice)
-#If you run this directly on the script the root name will be __name__
-#If you import this module from any other script, then the logger __name__ will be replaced by the module name.
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
-
-file_handler = logging.FileHandler('macs_converter.log')
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-
+from pprint import pprint
 
 #################################### DEFS  ##############################################
 def get_invalid_macs(macs_list):
@@ -50,14 +22,15 @@ def get_invalid_macs(macs_list):
             if len(new_mac) != 12:
                 invalid_macs.append(original_macs)
 
-    logger.debug("\t1 - Function: get_invalid_macs")
-    logger.debug("\t\t1.1 - Invalid Macs: {}".format(invalid_macs))
-    logger.debug("\t\t1.2 - Blank lines are located in lines/elements: {}".format(blank_lines))
+    logger.debug('\t1 - Function Name: "get_invalid_macs"')
+    logger.debug('\t  1.1 - Invalid Macs: {}'.format(invalid_macs))
+    logger.debug('\t  1.2 - Blank lines are located in lines/elements: {}\n'.format(blank_lines))
     return invalid_macs, blank_lines
 
 def rem_invalid_macs(macs_list, invalid_macs):
     valid_macs = [x for x in macs_list if x not in invalid_macs]
-    #print(valid_macs)
+    logger.debug('\t2 - Function Name: "rem_invalid_macs"')
+    logger.debug('\t  2.1 - Valid Macs (That were not removed): {}\n'.format(valid_macs))
     return valid_macs
 
 '''
@@ -72,13 +45,15 @@ def no_delimiter_macs(valid_macs):
     for original_mac in valid_macs:
         no_sep_mac = re.sub(r'[^a-fA-F0-9]', '', original_mac)
         no_sep_macs.update({original_mac: no_sep_mac})
-    #print(no_sep_macs)
+    logger.debug('\t3 - Function Name: "no_delimiter_macs"')
+    logger.debug('\t  3.1 - Dict = original_macs: no_delimiter_macs - {}\n'.format(no_sep_macs))
     return no_sep_macs
 
 
 def add_delimiter(no_sep_macs, delimiter):
     separated_macs = {}
-    #print(delimiter)
+    logger.debug('\t4 - Function Name: "add_delimiter"')
+    logger.debug('\t  4.1 - The delimiter passed is:  "{}"'.format(delimiter))
     if delimiter == ':' or delimiter == '-':
         for original_mac, no_sep_mac in no_sep_macs.items():
             temp_mac = no_sep_mac
@@ -92,13 +67,13 @@ def add_delimiter(no_sep_macs, delimiter):
     else:
         raise Exception('delimiter should be one of [:-.]. You passed: {}'.format(delimiter))
 
-   # pprint(separated_macs)
+    logger.debug('\t  4.2 - Dict = original_macs: macs_with_delimiter :  "{}"\n'.format(separated_macs))
     return(separated_macs)
 
 
 ##################################### END DEFS #########################################
 #Parsing arguments
-parser = argparse.ArgumentParser(description=''''Process a list or a file containing MACs and returns a 
+parser = argparse.ArgumentParser(description='''Process a list or a file containing MACs and returns a \ 
     list of valid(formatted) MACs and a list of invalid_MACs''')
 
 # Creating mutually exclusive args --list or --file. One of them must be passed to the script.
@@ -112,11 +87,38 @@ group.add_argument('--file', metavar='FILENAME', type=str, help='File with only 
 parser.add_argument('--delimiter', '-d', metavar='[-.:]', type=str, default=':',
                     help='Default is colon ":" - Defines the output notation of the MACS [: - .]')
 
+# When the --deubg option is used, args.parse will return True because of action='store_true'
+parser.add_argument('--debug', default='None', action='store_true',
+                    help='This option writes debug statements to ./macs_converte.log')
+
 parser.add_argument('--version', action='version', version='%(prog)s 1.0')
 
 args = parser.parse_args()
 filename= str(args.file)
 
+
+# Enabling logging
+timestamp = '%d-%m-%Y %H:%M:%S'
+
+# Creates a new logger. If the --debug option is passed logging to a file.
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG if args.debug == True else logging.INFO)
+
+# Creates a file handler which logs debug events to a file
+formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s',
+    timestamp)
+
+file_handler = logging.FileHandler('macs_converter.log')
+file_handler.setFormatter(formatter)
+
+# create console handler with a higher log level
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+
+# Adds the handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 # Defining the input of the macs_list
 if args.list:
@@ -128,10 +130,13 @@ elif args.file:
 
 delim = args.delimiter
 
-#print(args)
-#print(args.file)
-#print(args.list)
-#print(macs_list)
+
+logger.debug('\t0 - Parameters passed via cli:')
+logger.debug('\t  0.1 - args Parameters:  "{}"'.format(args))
+logger.debug('\t  0.2 - args.file Parameters:  "{}"'.format(args.file))
+logger.debug('\t  0.3 - args.list Parameters:  "{}"'.format(args.list))
+logger.debug('\t  0.4 - args.debu Parameters:  "{}"'.format(args.debug))
+logger.debug('\t  0.5 - Original mac\'s list passed to "get_invalid_macs()":  "{}"\n'.format(macs_list))
 
 #########################FUNCTION CALLS ####################
 invalid_macs, blank_lines = get_invalid_macs(macs_list)
@@ -159,8 +164,9 @@ if invalid_macs:
         else:
             continue
 
-# For Debugging - Count blank lines
-#print('\n')
-#print("- There are {} blank lines in the list:".format(len(blank_lines)))
-#for line in blank_lines:
-#    print('Blank line - (Line {})'.format(line))
+# Debugs - Showing blank lines and line numbers. 
+blanks_number = len(blank_lines) 
+logger.debug('\t5 - There are "{}" blank lines in the list/file passed:'.format(blanks_number))
+for index, line in enumerate(blank_lines):
+    logger.debug('\t  5.{} Blank line - (Line {})'.format(index + 1, line))
+logger.debug('\n')
