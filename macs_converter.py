@@ -3,10 +3,34 @@ import re
 #from pprint import pprint
 import argparse
 import csv
-
+import logging
 
 # python mac_formatter.py --list FF253456789AB EX:2///34/56789/AB aa-23-45-67-89-AB --delimiter '.'
 # python mac_formatter.py --file macs.csv --delimiter '.'
+
+# Logging format
+#https://docs.python.org/3/library/logging.html#logrecord-attributes
+#log_format='%(asctime)s:%(levelname)s:%(message)s'
+
+#Method 1 - ROOT Logger - Logging to a file
+#logging.basicConfig(filename='macs_converter.log', level=logging.DEBUG, format= log_format)
+
+#Method 2 - ROOT Logger - Logging to stdout
+#logging.basicConfig(level=logging.DEBUG)
+
+#Method 3- Logging with a non default logger (Best practice)
+#If you run this directly on the script the root name will be __name__
+#If you import this module from any other script, then the logger __name__ will be replaced by the module name.
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
+
+file_handler = logging.FileHandler('macs_converter.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
 
 #################################### DEFS  ##############################################
 def get_invalid_macs(macs_list):
@@ -26,8 +50,9 @@ def get_invalid_macs(macs_list):
             if len(new_mac) != 12:
                 invalid_macs.append(original_macs)
 
-    #print(invalid_macs)
-    #print(blank_lines)
+    logger.debug("\t1 - Function: get_invalid_macs")
+    logger.debug("\t\t1.1 - Invalid Macs: {}".format(invalid_macs))
+    logger.debug("\t\t1.2 - Blank lines are located in lines/elements: {}".format(blank_lines))
     return invalid_macs, blank_lines
 
 def rem_invalid_macs(macs_list, invalid_macs):
